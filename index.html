@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>业务应用包设计图问题汇总</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #e4e7ec;
+      --primary: #155eef;
+      --primary-soft: #eff4ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 48px auto 80px;
+    }
+
+    .report-header {
+      margin-bottom: 24px;
+      padding: 28px 32px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.35;
+    }
+
+    .summary {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      color: var(--muted);
+    }
+
+    .count {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .issue {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: 0 8px 24px rgb(16 24 40 / 5%);
+    }
+
+    .issue-content { padding: 28px 32px; }
+
+    .issue-title {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+
+    .index {
+      display: inline-grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 9px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .description {
+      margin: 0;
+      padding: 16px 18px;
+      border-left: 3px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      background: var(--primary-soft);
+      font-size: 16px;
+    }
+
+    .screenshot {
+      padding: 20px;
+      border-top: 1px solid var(--line);
+      background: #eef1f5;
+    }
+
+    .screenshot-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .screenshot-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .screenshot-list figure { margin: 0; }
+
+    .screenshot-list figcaption {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .page { width: min(100% - 24px, 1180px); margin-top: 20px; }
+      .report-header, .issue-content { padding: 20px; }
+      .summary { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .screenshot { padding: 12px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; }
+      .report-header, .issue { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="report-header">
+      <h1>业务应用包设计图问题汇总</h1>
+      <div class="summary">
+        <span class="count">共 6 个问题</span>
+        <span>持续整理中 · 更新于 2026-11-02</span>
+      </div>
+    </header>
+
+    <section class="issue" id="issue-1">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">01</span>
+          切换单位弹窗
+        </h2>
+        <p class="description">切换单位的弹窗高度需要固定，目前弹窗太短；移除底部的“取消”按钮，并在弹窗顶部增加一个检索条。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">问题截图</p>
+        <img src="业务应用包-设计图问题汇总-assets/01-切换单位弹窗.png" alt="切换单位弹窗设计图问题截图">
+      </div>
+    </section>
+
+    <section class="issue" id="issue-2" style="margin-top: 24px;">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">02</span>
+          业务应用包 Logo
+        </h2>
+        <p class="description">业务应用包 Logo 需要去超星化，不能直接使用学习通 Logo，应替换为符合业务应用包自身定位的独立品牌标识。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">问题截图</p>
+        <img src="业务应用包-设计图问题汇总-assets/02-业务应用包Logo.png" alt="业务应用包使用学习通 Logo 的问题截图">
+      </div>
+    </section>
+
+    <section class="issue" id="issue-3" style="margin-top: 24px;">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">03</span>
+          对话输入框位置
+        </h2>
+        <p class="description">对话输入框位置偏下，推荐卡片与输入框之间存在大面积无效空白，需要上移输入框并缩短中间留白。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">问题截图</p>
+        <img src="业务应用包-设计图问题汇总-assets/03-对话输入框位置.png" alt="AI 创建页对话输入框位置偏下的问题截图">
+      </div>
+    </section>
+
+    <section class="issue" id="issue-4" style="margin-top: 24px;">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">04</span>
+          应用图标上传入口
+        </h2>
+        <p class="description">“应用图标”设置项缺少明确的上传入口，需要增加可识别、可操作的图标上传功能入口。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">问题截图</p>
+        <img src="业务应用包-设计图问题汇总-assets/04-应用图标上传入口.png" alt="应用图标设置缺少上传入口的问题截图">
+      </div>
+    </section>
+
+    <section class="issue" id="issue-5" style="margin-top: 24px;">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">05</span>
+          应用 URL 一键复制
+        </h2>
+        <p class="description">“应用 URL”缺少一键复制按钮，需要增加复制入口，方便用户快速复制完整链接。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">问题截图</p>
+        <img src="业务应用包-设计图问题汇总-assets/05-应用URL复制按钮.png" alt="应用 URL 缺少一键复制按钮的问题截图">
+      </div>
+    </section>
+
+    <section class="issue" id="issue-6" style="margin-top: 24px;">
+      <div class="issue-content">
+        <h2 class="issue-title">
+          <span class="index">06</span>
+          补充权限设置功能
+        </h2>
+        <p class="description">需要补充完整的“权限设置”部分，包括菜单权限、角色权限配置、应用权限以及数据权限设置。</p>
+      </div>
+      <div class="screenshot">
+        <p class="screenshot-label">功能参考截图</p>
+        <div class="screenshot-list">
+          <figure>
+            <figcaption>1. 菜单权限与角色列表</figcaption>
+            <img src="业务应用包-设计图问题汇总-assets/06-1-菜单权限.png" alt="菜单权限与角色列表功能截图">
+          </figure>
+          <figure>
+            <figcaption>2. 配置角色菜单权限</figcaption>
+            <img src="业务应用包-设计图问题汇总-assets/06-2-配置角色权限.png" alt="配置角色菜单权限功能截图">
+          </figure>
+          <figure>
+            <figcaption>3. 应用权限管理</figcaption>
+            <img src="业务应用包-设计图问题汇总-assets/06-3-应用权限.png" alt="应用权限管理功能截图">
+          </figure>
+          <figure>
+            <figcaption>4. 数据权限设置</figcaption>
+            <img src="业务应用包-设计图问题汇总-assets/06-4-数据权限设置.png" alt="数据权限设置功能截图">
+          </figure>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
