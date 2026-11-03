@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>稿纸数据绑定版本刷新</title>
+  <style>
+    :root {
+      --primary: #1469e7;
+      --primary-hover: #0d5dcc;
+      --primary-soft: #eef5ff;
+      --text: #1f2329;
+      --muted: #646a73;
+      --border: #dfe3e8;
+      --line: #ebeef2;
+      --bg: #f5f6f8;
+      --success: #00a870;
+      --danger: #d54941;
+      --warning-bg: #fff8e6;
+      --warning-border: #f5d48c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 1100px;
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.5 "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .topbar {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      color: #fff;
+      background: #15233b;
+      box-shadow: 0 1px 4px rgba(31, 35, 41, .18);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2f88ff, #0a5ed7);
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .brand-title { font-size: 16px; font-weight: 600; }
+    .topbar-meta { color: rgba(255,255,255,.72); font-size: 13px; }
+
+    .page {
+      width: calc(100% - 48px);
+      max-width: 1440px;
+      margin: 24px auto 40px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .page-heading h1 { margin: 0 0 6px; font-size: 22px; line-height: 1.4; }
+    .page-heading p { margin: 0; color: var(--muted); }
+    .mode-tag {
+      margin-top: 4px;
+      padding: 4px 10px;
+      color: #8a5a00;
+      border: 1px solid #f0cb79;
+      border-radius: 4px;
+      background: #fff8e5;
+      font-size: 12px;
+    }
+
+    .card {
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(31, 35, 41, .04);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 54px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .card-header h2 { margin: 0; font-size: 16px; }
+    .card-body { padding: 20px; }
+
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      color: #72531d;
+      border: 1px solid var(--warning-border);
+      border-radius: 6px;
+      background: var(--warning-bg);
+    }
+    .notice-icon {
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      margin-top: 1px;
+      border-radius: 50%;
+      color: #fff;
+      background: #e6a23c;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .notice strong { display: block; margin-bottom: 2px; color: #594017; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(280px, 420px);
+      gap: 18px 24px;
+    }
+    .field label { display: block; margin-bottom: 7px; font-weight: 600; }
+    .required { margin-right: 4px; color: var(--danger); }
+    .field input, .filter-input, .filter-select {
+      width: 100%;
+      height: 36px;
+      padding: 0 11px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      outline: none;
+      background: #fff;
+      transition: border-color .16s, box-shadow .16s;
+    }
+    .field input:focus, .filter-input:focus, .filter-select:focus {
+      border-color: #74a9f3;
+      box-shadow: 0 0 0 3px rgba(20, 105, 231, .09);
+    }
+    .field input.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(213,73,65,.08); }
+    .field-help { min-height: 20px; margin-top: 5px; color: #8f959e; font-size: 12px; }
+    .field-help.error { color: var(--danger); }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .btn {
+      height: 34px;
+      padding: 0 17px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      font-weight: 500;
+    }
+    .btn-primary { color: #fff; border-color: var(--primary); background: var(--primary); }
+    .btn-primary:hover { border-color: var(--primary-hover); background: var(--primary-hover); }
+    .btn-primary:disabled { cursor: not-allowed; border-color: #9bc0f5; background: #9bc0f5; }
+    .btn-secondary { color: #3a4049; border-color: var(--border); background: #fff; }
+    .btn-secondary:hover { color: var(--primary); border-color: #8db8f3; }
+    .scope-tip { color: var(--muted); font-size: 12px; }
+
+    .filters { display: flex; align-items: center; gap: 10px; }
+    .filter-input { width: 240px; }
+    .filter-select { width: 120px; }
+    .record-count { color: var(--muted); font-size: 13px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td {
+      height: 46px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th { color: #4e5969; background: #f7f8fa; font-weight: 600; }
+    tbody tr:hover { background: #fafcff; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .mono { font-family: Consolas, "SFMono-Regular", monospace; font-size: 13px; }
+    .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .status-success { color: var(--success); }
+    .status-failed { color: var(--danger); }
+    .status-running { color: #e69b20; }
+    .link-button { padding: 0; color: var(--primary); border: 0; background: transparent; }
+    .link-button:hover { text-decoration: underline; }
+
+    .empty-state { display: none; padding: 48px 20px 54px; text-align: center; color: var(--muted); }
+    .empty-state.show { display: block; }
+    .empty-icon {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 10px;
+      color: #9ba3ae;
+      border-radius: 14px;
+      background: #f1f3f5;
+      font-size: 24px;
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(20, 31, 50, .48);
+    }
+    .modal-mask.show { display: flex; }
+    .modal {
+      width: 520px;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 56px rgba(13, 27, 51, .24);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 54px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-header h3 { margin: 0; font-size: 16px; }
+    .modal-close { width: 30px; height: 30px; color: #8f959e; border: 0; background: transparent; font-size: 22px; }
+    .modal-body { padding: 20px; }
+    .confirm-copy { margin: 0 0 16px; color: #4e5969; }
+    .summary {
+      margin: 0;
+      padding: 4px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8f9fb;
+    }
+    .summary-row { display: grid; grid-template-columns: 110px 1fr; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .summary-row:last-child { border-bottom: 0; }
+    .summary dt { color: var(--muted); }
+    .summary dd { margin: 0; font-weight: 500; word-break: break-all; }
+    .risk-line { margin: 16px 0 0; color: var(--danger); font-size: 13px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--line); }
+
+    .progress-box { display: none; padding: 18px; border-radius: 6px; background: #f7f9fc; }
+    .progress-box.show { display: block; }
+    .progress-top { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .progress-track { height: 7px; overflow: hidden; border-radius: 999px; background: #e3e8ef; }
+    .progress-bar { width: 0; height: 100%; border-radius: inherit; background: var(--primary); transition: width .3s ease; }
+    .progress-step { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+    .toast {
+      position: fixed;
+      top: 76px;
+      left: 50%;
+      z-index: 50;
+      min-width: 260px;
+      padding: 11px 16px;
+      color: #fff;
+      border-radius: 6px;
+      background: rgba(31, 35, 41, .94);
+      box-shadow: 0 8px 28px rgba(31, 35, 41, .18);
+      opacity: 0;
+      transform: translate(-50%, -8px);
+      pointer-events: none;
+      transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 1180px) {
+      .page { width: calc(100% - 32px); }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">文</div>
+      <div class="brand-title">公文运维工具</div>
+    </div>
+    <div class="topbar-meta">稿纸数据维护</div>
+  </header>
+
+  <main class="page">
+    <div class="page-heading">
+      <div>
+        <h1>稿纸数据绑定版本刷新</h1>
+        <p>将指定公文模板下全部数据绑定的稿纸版本统一刷新至当前最新版本。</p>
+      </div>
+      <span class="mode-tag" id="modeTag">交互演示模式</span>
+    </div>
+
+    <section class="card" aria-labelledby="refresh-title">
+      <div class="card-header">
+        <h2 id="refresh-title">刷新范围</h2>
+      </div>
+      <div class="card-body">
+        <div class="notice">
+          <span class="notice-icon" aria-hidden="true">!</span>
+          <div>
+            <strong>操作说明</strong>
+            本操作会处理该公文模板下的全部数据，请确认单位与模板信息无误后再执行。页面不会修改稿纸模板本身。
+          </div>
+        </div>
+
+        <form id="refreshForm" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="fid"><span class="required">*</span>单位 fid</label>
+              <input id="fid" name="fid" type="text" inputmode="numeric" autocomplete="off" placeholder="请输入单位 fid" maxlength="20">
+              <div class="field-help" id="fidHelp">仅支持数字，例如：210561</div>
+            </div>
+            <div class="field">
+              <label for="formId"><span class="required">*</span>公文模板 formId</label>
+              <input id="formId" name="formId" type="text" autocomplete="off" placeholder="请输入公文模板 formId" maxlength="64">
+              <div class="field-help" id="formIdHelp">用于定位需要刷新的公文模板</div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="openConfirm" type="submit">刷新至最新版本</button>
+            <button class="btn btn-secondary" id="resetForm" type="button">清空</button>
+            <span class="scope-tip">刷新范围：该模板下全部数据绑定的稿纸版本</span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="records-title">
+      <div class="card-header">
+        <div>
+          <h2 id="records-title">操作记录</h2>
+          <span class="record-count" id="recordCount">共 0 条</span>
+        </div>
+        <div class="filters">
+          <input class="filter-input" id="recordSearch" type="search" placeholder="搜索 fid 或 formId" aria-label="搜索操作记录">
+          <select class="filter-select" id="statusFilter" aria-label="按状态筛选">
+            <option value="all">全部状态</option>
+            <option value="success">成功</option>
+            <option value="failed">失败</option>
+            <option value="running">执行中</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap" id="tableWrap">
+        <table>
+          <colgroup>
+            <col style="width: 180px">
+            <col style="width: 130px">
+            <col style="width: 190px">
+            <col style="width: 120px">
+            <col style="width: 100px">
+            <col style="width: 110px">
+            <col>
+            <col style="width: 90px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>操作时间</th>
+              <th>fid</th>
+              <th>formId</th>
+              <th>处理范围</th>
+              <th>状态</th>
+              <th>处理条数</th>
+              <th>处理结果</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="recordBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon" aria-hidden="true">⌁</div>
+        <div id="emptyTitle">暂无操作记录</div>
+        <small>完成一次版本刷新后，记录将显示在这里</small>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-mask" id="confirmMask" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="confirmTitle">确认刷新稿纸版本</h3>
+        <button class="modal-close" type="button" data-close="confirmMask" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="confirmContent">
+          <p class="confirm-copy">请核对以下信息。确认后，将刷新该模板下全部数据绑定的稿纸版本。</p>
+          <dl class="summary">
+            <div class="summary-row"><dt>单位 fid</dt><dd class="mono" id="confirmFid">-</dd></div>
+            <div class="summary-row"><dt>模板 formId</dt><dd class="mono" id="confirmFormId">-</dd></div>
+            <div class="summary-row"><dt>刷新范围</dt><dd>全部数据</dd></div>
+            <div class="summary-row"><dt>目标版本</dt><dd>当前最新稿纸版本</dd></div>
+          </dl>
+          <p class="risk-line">请勿重复提交；任务执行期间请保持页面打开。</p>
+        </div>
+        <div class="progress-box" id="progressBox">
+          <div class="progress-top"><strong>正在刷新</strong><span id="progressPercent">0%</span></div>
+          <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="progress-step" id="progressStep">正在校验模板信息…</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelConfirm" type="button" data-close="confirmMask">取消</button>
+        <button class="btn btn-primary" id="confirmRefresh" type="button">确认刷新</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="detailMask" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="detailTitle">操作详情</h3>
+        <button class="modal-close" type="button" data-close="detailMask" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <dl class="summary" id="detailSummary"></dl>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="button" data-close="detailMask">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // 接入真实服务时，将此处替换为刷新接口地址；留空时使用本地演示流程。
+    const UPDATE_ENDPOINT = "";
+    const STORAGE_KEY = "paper-binding-version-refresh-records-v1";
+
+    const form = document.getElementById("refreshForm");
+    const fidInput = document.getElementById("fid");
+    const formIdInput = document.getElementById("formId");
+    const confirmMask = document.getElementById("confirmMask");
+    const detailMask = document.getElementById("detailMask");
+    const confirmButton = document.getElementById("confirmRefresh");
+    const cancelButton = document.getElementById("cancelConfirm");
+    const progressBox = document.getElementById("progressBox");
+    const progressBar = document.getElementById("progressBar");
+    const progressPercent = document.getElementById("progressPercent");
+    const progressStep = document.getElementById("progressStep");
+    const recordBody = document.getElementById("recordBody");
+    const tableWrap = document.getElementById("tableWrap");
+    const emptyState = document.getElementById("emptyState");
+    const emptyTitle = document.getElementById("emptyTitle");
+    const recordCount = document.getElementById("recordCount");
+    const searchInput = document.getElementById("recordSearch");
+    const statusFilter = document.getElementById("statusFilter");
+    const toast = document.getElementById("toast");
+
+    let records = loadRecords();
+    let activeRecordId = null;
+
+    if (UPDATE_ENDPOINT) {
+      document.getElementById("modeTag").textContent = "已接入服务";
+    }
+
+    function loadRecords() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records.slice(0, 100)));
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;"
+      }[char]));
+    }
+
+    function formatTime(date = new Date()) {
+      const pad = value => String(value).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    function validateField(input, helper, validator, message, defaultText) {
+      const valid = validator(input.value.trim());
+      input.classList.toggle("invalid", !valid);
+      helper.classList.toggle("error", !valid);
+      helper.textContent = valid ? defaultText : message;
+      return valid;
+    }
+
+    function validateForm() {
+      const fidValid = validateField(
+        fidInput,
+        document.getElementById("fidHelp"),
+        value => /^\d+$/.test(value),
+        "请输入正确的数字 fid",
+        "仅支持数字，例如：210561"
+      );
+      const formIdValid = validateField(
+        formIdInput,
+        document.getElementById("formIdHelp"),
+        value => /^[A-Za-z0-9_-]+$/.test(value),
+        "请输入正确的 formId（字母、数字、下划线或短横线）",
+        "用于定位需要刷新的公文模板"
+      );
+      return fidValid && formIdValid;
+    }
+
+    function resetProgress() {
+      document.getElementById("confirmContent").style.display = "block";
+      progressBox.classList.remove("show");
+      progressBar.style.width = "0%";
+      progressPercent.textContent = "0%";
+      progressStep.textContent = "正在校验模板信息…";
+      confirmButton.disabled = false;
+      confirmButton.textContent = "确认刷新";
+      cancelButton.disabled = false;
+    }
+
+    function openModal(mask) {
+      mask.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(mask) {
+      if (confirmButton.disabled && mask === confirmMask) return;
+      mask.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function statusMeta(status) {
+      return {
+        success: { label: "成功", className: "status-success" },
+        failed: { label: "失败", className: "status-failed" },
+        running: { label: "执行中", className: "status-running" }
+      }[status] || { label: status, className: "" };
+    }
+
+    function renderRecords() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusFilter.value;
+      const filtered = records.filter(record => {
+        const matchesKeyword = !keyword || record.fid.toLowerCase().includes(keyword) || record.formId.toLowerCase().includes(keyword);
+        const matchesStatus = selectedStatus === "all" || record.status === selectedStatus;
+        return matchesKeyword && matchesStatus;
+      });
+
+      recordCount.textContent = `共 ${filtered.length} 条`;
+      recordBody.innerHTML = filtered.map(record => {
+        const status = statusMeta(record.status);
+        return `
+          <tr>
+            <td>${escapeHtml(record.time)}</td>
+            <td class="mono ellipsis" title="${escapeHtml(record.fid)}">${escapeHtml(record.fid)}</td>
+            <td class="mono ellipsis" title="${escapeHtml(record.formId)}">${escapeHtml(record.formId)}</td>
+            <td>全部数据</td>
+            <td><span class="status ${status.className}">${status.label}</span></td>
+            <td>${escapeHtml(record.affectedCount ?? "—")}</td>
+            <td class="ellipsis" title="${escapeHtml(record.result)}">${escapeHtml(record.result)}</td>
+            <td><button class="link-button" type="button" data-detail-id="${escapeHtml(record.id)}">查看详情</button></td>
+          </tr>`;
+      }).join("");
+
+      const isEmpty = filtered.length === 0;
+      tableWrap.style.display = isEmpty ? "none" : "block";
+      emptyState.classList.toggle("show", isEmpty);
+      emptyTitle.textContent = records.length && isEmpty ? "未找到匹配记录" : "暂无操作记录";
+    }
+
+    function addRecord(fid, formId) {
+      const record = {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        time: formatTime(),
+        fid,
+        formId,
+        scope: "全部数据",
+        target: "当前最新稿纸版本",
+        status: "running",
+        result: "任务正在执行",
+        mode: UPDATE_ENDPOINT ? "接口执行" : "本地演示",
+        requestId: `PVR-${Date.now()}`
+      };
+      records.unshift(record);
+      activeRecordId = record.id;
+      saveRecords();
+      renderRecords();
+      return record;
+    }
+
+    function updateRecord(id, changes) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+      Object.assign(record, changes);
+      saveRecords();
+      renderRecords();
+    }
+
+    function setProgress(percent, message) {
+      progressBar.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+      progressStep.textContent = message;
+    }
+
+    async function runRefresh(fid, formId) {
+      const record = addRecord(fid, formId);
+      document.getElementById("confirmContent").style.display = "none";
+      progressBox.classList.add("show");
+      confirmButton.disabled = true;
+      cancelButton.disabled = true;
+      confirmButton.textContent = "执行中…";
+
+      try {
+        setProgress(18, "正在校验单位与公文模板…");
+        await delay(480);
+
+        if (UPDATE_ENDPOINT) {
+          setProgress(42, "正在提交版本刷新任务…");
+          const response = await fetch(UPDATE_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fid, formId })
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.message || `请求失败（HTTP ${response.status}）`);
+          setProgress(100, data.message || "全部稿纸版本已刷新至最新");
+          updateRecord(record.id, {
+            status: "success",
+            result: data.message || "全部稿纸版本已刷新至最新",
+            affectedCount: data.affectedCount ?? "接口未返回",
+            requestId: data.requestId || record.requestId
+          });
+        } else {
+          setProgress(48, "正在获取最新稿纸版本…");
+          await delay(520);
+          setProgress(76, "正在更新全部数据绑定关系…");
+          await delay(650);
+          setProgress(100, "演示任务执行完成");
+          updateRecord(record.id, {
+            status: "success",
+            result: "演示完成；接入后端接口后执行真实刷新",
+            affectedCount: "演示模式未统计"
+          });
+        }
+
+        await delay(520);
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        closeModal(confirmMask);
+        resetProgress();
+        showToast(UPDATE_ENDPOINT ? "稿纸版本刷新成功" : "演示任务已完成并写入操作记录");
+      } catch (error) {
+        setProgress(100, error.message || "刷新失败");
+        progressBar.style.background = "var(--danger)";
+        updateRecord(record.id, { status: "failed", result: error.message || "刷新失败" });
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        confirmButton.textContent = "关闭";
+        confirmButton.onclick = () => {
+          closeModal(confirmMask);
+          confirmButton.onclick = null;
+          progressBar.style.background = "var(--primary)";
+          resetProgress();
+        };
+      }
+    }
+
+    function delay(milliseconds) {
+      return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    function showDetail(id) {
+      const record = records.find(item => item.id === id);
+      if (!record) return;
+      const status = statusMeta(record.status);
+      const rows = [
+        ["操作时间", record.time],
+        ["单位 fid", record.fid, true],
+        ["模板 formId", record.formId, true],
+        ["处理范围", "该模板下全部数据"],
+        ["目标版本", record.target],
+        ["执行状态", status.label],
+        ["处理结果", record.result],
+        ["影响数据量", record.affectedCount || "任务尚未完成"],
+        ["请求编号", record.requestId, true],
+        ["执行方式", record.mode]
+      ];
+      document.getElementById("detailSummary").innerHTML = rows.map(([label, value, mono]) => `
+        <div class="summary-row"><dt>${escapeHtml(label)}</dt><dd class="${mono ? "mono" : ""}">${escapeHtml(value)}</dd></div>
+      `).join("");
+      openModal(detailMask);
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!validateForm()) return;
+      resetProgress();
+      document.getElementById("confirmFid").textContent = fidInput.value.trim();
+      document.getElementById("confirmFormId").textContent = formIdInput.value.trim();
+      openModal(confirmMask);
+    });
+
+    fidInput.addEventListener("input", () => {
+      fidInput.value = fidInput.value.replace(/\D/g, "");
+      if (fidInput.classList.contains("invalid")) validateForm();
+    });
+    formIdInput.addEventListener("input", () => {
+      if (formIdInput.classList.contains("invalid")) validateForm();
+    });
+
+    document.getElementById("resetForm").addEventListener("click", () => {
+      form.reset();
+      [fidInput, formIdInput].forEach(input => input.classList.remove("invalid"));
+      document.getElementById("fidHelp").className = "field-help";
+      document.getElementById("fidHelp").textContent = "仅支持数字，例如：210561";
+      document.getElementById("formIdHelp").className = "field-help";
+      document.getElementById("formIdHelp").textContent = "用于定位需要刷新的公文模板";
+      fidInput.focus();
+    });
+
+    confirmButton.addEventListener("click", () => {
+      if (confirmButton.onclick) return;
+      runRefresh(fidInput.value.trim(), formIdInput.value.trim());
+    });
+
+    document.querySelectorAll("[data-close]").forEach(button => {
+      button.addEventListener("click", () => closeModal(document.getElementById(button.dataset.close)));
+    });
+
+    [confirmMask, detailMask].forEach(mask => {
+      mask.addEventListener("click", event => {
+        if (event.target === mask) closeModal(mask);
+      });
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape") return;
+      if (detailMask.classList.contains("show")) closeModal(detailMask);
+      else if (confirmMask.classList.contains("show")) closeModal(confirmMask);
+    });
+
+    recordBody.addEventListener("click", event => {
+      const button = event.target.closest("[data-detail-id]");
+      if (button) showDetail(button.dataset.detailId);
+    });
+
+    searchInput.addEventListener("input", renderRecords);
+    statusFilter.addEventListener("change", renderRecords);
+
+    renderRecords();
+  </script>
+</body>
+</html>
